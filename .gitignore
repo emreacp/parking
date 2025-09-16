@@ -1,0 +1,34 @@
+# Hassas bilgileri içeren dosyalar
+.env
+.env.local
+.env.production
+
+# Veritabanı dosyaları
+*.db
+*.sqlite
+*.sqlite3
+
+# Log dosyaları
+*.log
+logs/
+
+# Geçici dosyalar
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules (eğer kullanıyorsanız)
+node_modules/
+
+# Composer vendor (eğer kullanıyorsanız)
+vendor/
+
+# XAMPP geçici dosyaları
+xampp/

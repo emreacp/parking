@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Giriş / Kayıt - ACP Parking</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .form-box { display: none; }
+    .form-box.active { display: block; }
+    .hidden { display: none; }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      border-radius: 10px;
+      text-align: center;
+      z-index: 1001;
+    }
+    .popup button {
+      margin-top: 20px;
+      padding: 10px 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+ body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: url('img/arka_plan_giris.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+.form-wrapper {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  max-width: 400px;
+  width: 100%;
+  color: white;
+}
+
+
+
+
+  </style>
+</head>
+<body>
+<?php include 'navbar.php'; ?>
+
+<!-- Başarı popup kutusu -->
+<div id="popupSuccess" class="hidden">
+  <div class="popup-overlay"></div>
+  <div class="popup">
+    <h3>✅ Kayıt başarılı!</h3>
+    <p>Giriş yapmak için butona tıklayın.</p>
+    <button onclick="closeSuccessPopup()">Tamam</button>
+  </div>
+</div>
+<!-- Hata popup kutusu -->
+<div id="popupError" class="hidden">
+  <div class="popup-overlay"></div>
+  <div class="popup" style="background: #ffe0e0; border: 2px solid #cc0000;">
+    <h3 style="color: #cc0000;">❌ Giriş Başarısız</h3>
+    <p>E-posta veya şifre hatalı. Lütfen tekrar deneyin.</p>
+    <button onclick="closeErrorPopup()">Tekrar Dene</button>
+  </div>
+</div>
+
+<div class="form-wrapper">
+  <div id="userLogin" class="form-box">
+    <h2>Kullanıcı Girişi</h2>
+    <form action="kullanici_islemleri.php" method="POST">
+      <input type="email" name="email" placeholder="E-posta" required>
+      <input type="password" name="sifre" placeholder="Şifre" required>
+      <input type="hidden" name="giris_tipi" value="kullanici">
+      <button type="submit">Giriş Yap</button>
+    </form>
+    <p style="margin-top:10px;">Hesabın yok mu? <a href="#register" onclick="showTab('register')">Kayıt Ol</a></p>
+  </div>
+
+  <div id="adminLogin" class="form-box">
+    <h2>Admin Girişi</h2>
+    <form action="kullanici_islemleri.php" method="POST">
+      <input type="email" name="email" placeholder="Admin E-posta" required>
+      <input type="password" name="sifre" placeholder="Şifre" required>
+      <input type="hidden" name="giris_tipi" value="admin">
+      <button type="submit">Giriş Yap</button>
+    </form>
+  </div>
+
+  <div id="register" class="form-box">
+    <h2>Kayıt Ol</h2>
+    <form action="kullanici_islemleri.php" method="POST" enctype="multipart/form-data">
+      <input type="text" name="ad" placeholder="Ad Soyad" required>
+      <input type="email" name="email" placeholder="E-posta" required>
+      <input type="password" name="sifre" placeholder="Şifre" required>
+
+      <label><input type="radio" name="rol" value="kullanici" checked onchange="toggleBelge(false)"> Kullanıcıyım</label>
+      <label><input type="radio" name="rol" value="aday_admin" onchange="toggleBelge(true)"> İşletme sahibiyim</label>
+
+      <div id="belgeUpload" class="hidden">
+        <label>İşletme Belgesi (PDF veya Görsel):</label>
+        <input type="file" name="belge">
+      </div>
+
+      <input type="hidden" name="giris_tipi" value="kayit">
+      <button type="submit">Kayıt Ol</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.form-box').forEach(box => box.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+function toggleBelge(show) {
+  document.getElementById('belgeUpload').classList.toggle('hidden', !show);
+}
+function closeSuccessPopup() {
+  document.getElementById('popupSuccess').classList.add('hidden');
+  showTab("userLogin");
+}
+function closeErrorPopup() {
+  document.getElementById('popupError').classList.add('hidden');
+  window.location.hash = "";
+}
+
+// Sayfa yüklendiğinde
+window.addEventListener("load", function() {
+  const hash = window.location.hash.substring(1);
+  if (hash && document.getElementById(hash)) {
+    showTab(hash);
+  } else {
+    showTab("userLogin");
+  }
+
+  if (localStorage.getItem('kayitBasarili') === 'true') {
+    document.getElementById('popupSuccess').classList.remove('hidden');
+    localStorage.removeItem('kayitBasarili');
+  }
+});
+// Sayfa yüklendiğinde hata kontrolü
+if (window.location.hash === "#error=gecersiz") {
+   document.getElementById("popupError").classList.remove("hidden");
+  const box = document.getElementById("userLogin");
+  const errorDiv = document.createElement("div");
+  
+  box.appendChild(errorDiv);
+}
+
+</script>
+</body>
+</html>
